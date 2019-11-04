@@ -30,17 +30,24 @@ services:
         depends_on:
             - db
     nuxt:
-        build:
-            context: ./frontend
-        command: bash -c "yarn run dev"
-        volumes:
-            - ./frontend:/app
-        expose:
-            - "3000"
+        build: ./frontend
+        container_name: nuxt
+        restart: always
         ports:
             - "3000:3000"
-        depends_on:
-            - django
+        command: "npm run start"
+
+#        build:
+#            context: ./frontend
+##        command: bash -c "yarn run dev"
+#        volumes:
+#            - ./frontend:/app
+#        expose:
+#            - "3000"
+#        ports:
+#            - "3000:3000"
+#        depends_on:
+#            - django
 #    nginx:
 #        image: nginx:latest
 #        ports:
