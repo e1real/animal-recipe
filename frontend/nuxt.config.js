@@ -66,7 +66,7 @@ export default {
   ** See https://axios.nuxtjs.org/options
   */
   axios: {
-    baseURL: 'http://localhost:8000',
+    baseURL: 'http://django:8000',
     browserBaseURL: 'http://localhost:8000',
     credentials: true
   },
