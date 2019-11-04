@@ -48,9 +48,9 @@ export default {
     strategies: {
       local: {
         endpoints: {
-          login: { url: '/api/auth/token/create/', method: 'post', propertyName: 'auth_token' },
-          logout: { url: '/api/auth/token/destroy/', method: 'post' },
-          user: { url: '/api/auth/me/', propertyName: false },
+          login: { url: '/api/auth/token/login/', method: 'post', propertyName: 'auth_token' },
+          logout: { url: '/api/auth/token/logout/', method: 'post' },
+          user: { url: '/api/auth/users/me/', propertyName: false },
         },
         tokenType: 'Token',
         tokenName: 'Authorization'
@@ -66,8 +66,9 @@ export default {
   ** See https://axios.nuxtjs.org/options
   */
   axios: {
-    baseURL: 'http://django:8000',
-    browserBaseURL: 'http://localhost:8000'
+    baseURL: 'http://localhost:8000',
+    browserBaseURL: 'http://localhost:8000',
+    credentials: true
   },
   /*
   ** Build configuration
