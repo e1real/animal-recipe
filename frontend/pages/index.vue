@@ -1,6 +1,7 @@
 <template>
   <b-container fluid>
     <div>
+      <h4 class="text-center my-1">Рецепты</h4>
       <b-card class="mt-2 mb-0">
         <h6 class="h6">Фильтры:</h6>
         <b-row>
@@ -41,11 +42,12 @@
 
           <h6 class="h6">Таблица с рецептами:</h6>
           <b-link to="/recipes/create">
-            <b-button variant="success" size="sm">Создать рецепт</b-button>
+            <b-button variant="success" size="sm">Создать новый рецепт</b-button>
           </b-link>
         </div>
         <b-table
           show-empty
+          :busy="isBusy"
           :small="true"
           :hover="true"
           :items="items"
@@ -59,15 +61,28 @@
           :sort-direction="sortDirection"
           @filtered="onFiltered"
         >
+          <template v-slot:table-busy>
+            <div class="text-center text-danger my-2">
+              <b-spinner class="align-middle"></b-spinner>
+              <strong>Загрузка...</strong>
+            </div>
+          </template>
+
           <template v-slot:cell(name)="row">
-            {{ row.value.first }} {{ row.value.last }}
+            {{ row.value }}
+          </template>
+
+          <template v-slot:cell(compositions)="row">
+            <div v-if="row.item.ingredients.length" v-for="ingredient in row.item.ingredients">
+                {{ingredient.name}}
+            </div>
           </template>
 
           <template v-slot:cell(actions)="row">
             <b-button size="sm" @click="row.toggleDetails" variant="primary" class="very-sm-btn">
               редактировать
             </b-button>
-            <b-button size="sm" @click="row.toggleDetails" variant="danger" class="very-sm-btn">
+            <b-button size="sm" @click="" variant="danger" class="very-sm-btn">
               удалить
             </b-button>
           </template>
@@ -96,43 +111,44 @@
         data() {
             return {
                 items: [
-                    {isActive: true, age: 40, name: {first: 'Dickerson', last: 'Macdonald'}},
-                    {isActive: false, age: 21, name: {first: 'Larsen', last: 'Shaw'}},
-                    {
-                        isActive: false,
-                        age: 9,
-                        name: {first: 'Mini', last: 'Navarro'},
-                        _rowVariant: 'success'
-                    },
-                    {isActive: false, age: 89, name: {first: 'Geneva', last: 'Wilson'}},
-                    {isActive: true, age: 38, name: {first: 'Jami', last: 'Carney'}},
-                    {isActive: false, age: 27, name: {first: 'Essie', last: 'Dunlap'}},
-                    {isActive: true, age: 40, name: {first: 'Thor', last: 'Macdonald'}},
-                    {
-                        isActive: true,
-                        age: 87,
-                        name: {first: 'Larsen', last: 'Shaw'},
-                        _cellVariants: {age: 'danger', isActive: 'warning'}
-                    },
-                    {isActive: false, age: 26, name: {first: 'Mitzi', last: 'Navarro'}},
-                    {isActive: false, age: 22, name: {first: 'Genevieve', last: 'Wilson'}},
-                    {isActive: true, age: 38, name: {first: 'John', last: 'Carney'}},
-                    {isActive: false, age: 29, name: {first: 'Dick', last: 'Dunlap'}}
+                    // {isActive: true, age: 40, name: },
+                    // {isActive: false, age: 21, name: {first: 'Larsen', last: 'Shaw'}},
+                    // {
+                    //     isActive: false,
+                    //     age: 9,
+                    //     name: {first: 'Mini', last: 'Navarro'},
+                    //     _rowVariant: 'success'
+                    // },
+                    // {isActive: false, age: 89, name: {first: 'Geneva', last: 'Wilson'}},
+                    // {isActive: true, age: 38, name: {first: 'Jami', last: 'Carney'}},
+                    // {isActive: false, age: 27, name: {first: 'Essie', last: 'Dunlap'}},
+                    // {isActive: true, age: 40, name: {first: 'Thor', last: 'Macdonald'}},
+                    // {
+                    //     isActive: true,
+                    //     age: 87,
+                    //     name: {first: 'Larsen', last: 'Shaw'},
+                    //     _cellVariants: {age: 'danger', isActive: 'warning'}
+                    // },
+                    // {isActive: false, age: 26, name: {first: 'Mitzi', last: 'Navarro'}},
+                    // {isActive: false, age: 22, name: {first: 'Genevieve', last: 'Wilson'}},
+                    // {isActive: true, age: 38, name: {first: 'John', last: 'Carney'}},
+                    // {isActive: false, age: 29, name: {first: 'Dick', last: 'Dunlap'}}
                 ],
                 fields: [
                     {key: 'name', label: 'Наименование', sortable: true, sortDirection: 'desc'},
-                    {key: 'age', label: 'Person age', sortable: true, class: 'text-center'},
-                    {
-                        key: 'isActive',
-                        label: 'is Active',
-                        formatter: (value, key, item) => {
-                            return value ? 'Yes' : 'No'
-                        },
-                        sortable: true,
-                        sortByFormatted: true,
-                        filterByFormatted: true
-                    },
-                    {key: 'actions', label: 'Actions'}
+                    {key: 'compositions', label: 'Состав'},
+                    // {key: 'age', label: 'Person age', sortable: true, class: 'text-center'},
+                    // {
+                    //     key: 'isActive',
+                    //     label: 'is Active',
+                    //     formatter: (value, key, item) => {
+                    //         return value ? 'Yes' : 'No'
+                    //     },
+                    //     sortable: true,
+                    //     sortByFormatted: true,
+                    //     filterByFormatted: true
+                    // },
+                    {key: 'actions', label: 'Действие'}
                 ],
                 totalRows: 1,
                 currentPage: 1,
@@ -142,7 +158,8 @@
                 sortDesc: false,
                 sortDirection: 'asc',
                 filter: null,
-                filterOn: []
+                filterOn: [],
+                isBusy: false
             }
         },
         computed: {
@@ -153,17 +170,29 @@
                     .map(f => {
                         return {text: f.label, value: f.key}
                     })
-            }
+            },
+
         },
         mounted() {
             // Set the initial number of items
             this.totalRows = this.items.length
+            this.getRecipes()
         },
         methods: {
             onFiltered(filteredItems) {
                 // Trigger pagination to update the number of buttons/pages due to filtering
                 this.totalRows = filteredItems.length
                 this.currentPage = 1
+            },
+            async getRecipes() {
+                this.toggleBusy();
+                const {data} = await this.$axios.get('/api/recipes')
+                this.items = data.results;
+                this.toggleBusy();
+                console.log(data)
+            },
+            toggleBusy() {
+                this.isBusy = !this.isBusy
             }
         }
     }

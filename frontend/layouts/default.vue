@@ -21,7 +21,7 @@
             </template>
             <b-dropdown-item href="#" @click="logout">Выйти</b-dropdown-item>
           </b-nav-item-dropdown>
-          <b-nav-item to="/login">
+          <b-nav-item to="/login" v-else>
             Войти
           </b-nav-item>
         </b-navbar-nav>

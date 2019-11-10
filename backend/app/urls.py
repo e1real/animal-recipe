@@ -1,4 +1,4 @@
-"""recipes URL Configuration
+"""app URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/2.2/topics/http/urls/
@@ -15,9 +15,25 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from rest_framework import routers
+from app.recipes.views import RecipesViewSet, IngredientsViewSet, CompositionsViewSet, IngredientsToCompositionsViewSet
+
+admin.site.site_header = "Администрирование приложения комбикорм для лошадей"
+admin.site.site_title = "Комбикорм для лошадей"
+admin.site.index_title = "Добро пожаловать"
+
+
+router = routers.DefaultRouter()
+router.register(r'api/recipes', RecipesViewSet)
+router.register(r'api/ingredients', IngredientsViewSet)
+router.register(r'api/compositions', CompositionsViewSet)
+
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/auth/', include('djoser.urls')),
     path('api/auth/', include('djoser.urls.authtoken')),
+    # path('api/recipes/', include('app.recipes.urls')),
 ]
+urlpatterns += router.urls
