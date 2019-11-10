@@ -86,6 +86,7 @@ log_nginx:
 shell_django:
 	docker-compose exec django pipenv run ./manage.py shell
 
+
 check_django:
 	docker-compose exec django pipenv run ./manage.py check
 
