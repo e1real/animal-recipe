@@ -138,7 +138,7 @@
                     ingredients: []
                 },
 
-                compositions: null,
+                compositions: {},
                 existCompositions: null,
                 fields: [
                     {key: 'name', label: 'Наименование', sortable: true, sortDirection: 'desc'},
@@ -173,14 +173,13 @@
             /** Get all existing compositions. */
             async getAllCompositions() {
                 const {data} = await this.$axios.get('/api/compositions/');
-                this.compositions = data;
-                // data.forEach((value, idx) => {
-                //     this.compositions[value.id] = {
-                //         name: value.name,
-                //         value: "0"
-                //     };
-                //     // this.compositions[value.id].value = "0";
-                // });
+                // this.compositions = data;
+                data.forEach((value, idx) => {
+                    this.compositions[value.id] = {
+                        name: value.name,
+                        value: 0
+                    };
+                });
             },
             addIngredient() {
                 const exist = this.formRecipe.ingredients.find((el) => {
@@ -189,19 +188,23 @@
                 if (!exist) {
                     this.formRecipe.ingredients.push(this.selectedIngredient);
                     let compositions = this.selectedIngredient.compositions;
-                    this.compositions.forEach((value, idx) => {
-                        value
+                    compositions.forEach((value, idx) => {
+                        this.compositions[value.composition_id].value += Number(value.percentage);
                     });
                     return;
                 }
                 alert('Ингредиент существует');
             },
             removeIngredient(idx) {
+                const ingredient = this.formRecipe.ingredients[idx];
+                ingredient.compositions.forEach((value, idx) => {
+                    this.compositions[value.composition_id].value -= Number(value.percentage);
+                });
                 this.formRecipe.ingredients.splice(idx, 1);
             },
             onFiltered(filteredItems) {
                 // Trigger pagination to update the number of buttons/pages due to filtering
-                this.totalRows = filteredItems.length
+                this.totalRows = filteredItems.length;
                 this.currentPage = 1
             }
         },

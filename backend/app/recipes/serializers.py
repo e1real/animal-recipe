@@ -7,10 +7,11 @@ class IngredientsToCompositionsSerializer(serializers.ModelSerializer):
     # name = serializers.ReadOnlyField(source='ingredient.name')
     # percentage = serializers.DecimalField(decimal_places=2, max_digits=5)
     composition_name = serializers.ReadOnlyField(source='composition.name')
+    composition_id = serializers.ReadOnlyField(source='composition.id')
 
     class Meta:
         model = IngredientsToCompositions
-        fields = ('id', 'percentage', 'composition_name')
+        fields = ('id', 'percentage', 'composition_name', 'composition_id')
 
 
 class CompositionsSerializer(serializers.ModelSerializer):

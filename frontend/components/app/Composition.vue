@@ -1,7 +1,7 @@
 <template>
   <b-badge variant="dark" class="composition">
-    {{name}}<span v-if="name.length > 0"></span>
-    {{value}}</b-badge>
+    {{name}}<span v-if="name.length > 0">:</span>
+    {{value.toFixed(2)}}</b-badge>
 </template>
 <script>
     export default {
@@ -11,8 +11,8 @@
                 default: ''
             },
             value: {
-                type: String,
-                default: '0'
+                type: Number,
+                default: 0
             }
         }
     }
