@@ -4,7 +4,7 @@
     <hr class="mb-0"/>
     <div>
       <h6 class="my-3 text-center">Наименование ингредиента</h6>
-      <b-form-input placeholder="Введите наименование рецепта" class="mt-1 mb-2"
+      <b-form-input placeholder="Введите наименование рецепта" v-model="formRecipe.name" class="mt-1 mb-2"
                     size="sm"></b-form-input>
     </div>
 
@@ -25,7 +25,7 @@
             </svg>
           </div>
         </div>
-        <b-button variant="success" size="sm" class="my-2 align-self-end">Добавить</b-button>
+        <b-button variant="success" size="sm" class="my-2 align-self-end" @click="addIngredient()">Добавить</b-button>
         <b-tooltip target="dropDownInfoIcon" placement="top">
           <div v-if="selectedIngredient">
             <ul style="list-style: none;margin: 0;padding: 0">
@@ -39,11 +39,21 @@
       </div>
       <div class="ingredients-list">
         <h6 class="my-3">Список добавленных ингредиентов</h6>
+        <div class="composition-list-wrapper">
+          <composition
+            v-for="(composition, key) of compositions"
+            :key="key"
+            :name="composition.name"
+            :value="composition.value"
+          />
+        </div>
         <b-form-input v-model="filter" placeholder="Введите данные для пойска" class="mt-1 mb-2"
                       size="sm"></b-form-input>
 
         <b-table
           show-empty
+          empty-text="пусто"
+          empty-filtered-text="ничего не найдено"
           small
           bordered
           borderless
@@ -51,7 +61,7 @@
           head-variant="light"
           table-variant="light"
           stacked="md"
-          :items="items"
+          :items="formRecipe.ingredients"
           :fields="fields"
           :current-page="currentPage"
           :per-page="perPage"
@@ -63,30 +73,36 @@
           @filtered="onFiltered"
         >
           <template v-slot:cell(name)="row">
-            {{ row.value.first }} {{ row.value.last }}
+            <b>{{ row.value }}</b>
+          </template>
+          <template v-slot:cell(compositions)="row">
+              <span v-if="row.item.compositions"
+                    v-for="(value, key) in row.item.compositions"
+                    :key="key">
+                <span style="font-weight: 500">{{value.composition_name}}:</span>
+                {{ value.percentage}}<span v-if="row.item.compositions.length -1 !== key">, </span>
+              </span>
           </template>
 
           <template v-slot:cell(actions)="row">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                 class="feather feather-trash">
-              <polyline points="3 6 5 6 21 6" color="red"></polyline>
-              <path color="red" d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            <svg
+              @click="removeIngredient(row.index)"
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="feather feather-trash">
+              <polyline
+                points="3 6 5 6 21 6"
+                color="red"></polyline>
+              <path color="red"
+                    d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
             </svg>
-            <!--            <b-button size="sm" @click="info(row.item, row.index, $event.target)" class="mr-1">-->
-            <!--              Info modal-->
-            <!--            </b-button>-->
-            <!--            <b-button size="sm" @click="row.toggleDetails">-->
-            <!--              {{ row.detailsShowing ? 'Hide' : 'Show' }} Details-->
-            <!--            </b-button>-->
-          </template>
-
-          <template v-slot:row-details="row">
-            <b-card>
-              <ul>
-                <li v-for="(value, key) in row.item" :key="key">{{ key }}: {{ value }}</li>
-              </ul>
-            </b-card>
           </template>
         </b-table>
         <b-pagination
@@ -94,7 +110,6 @@
           :total-rows="totalRows"
           :per-page="perPage"
           size="sm"
-
         ></b-pagination>
       </div>
     </div>
@@ -106,57 +121,28 @@
 </template>
 <script>
     import searcherSelect from '~/components/forms/searcherSelect.vue'
+    import CompositionsList from '~/components/lists/CompositionsList.vue'
+    import Composition from '~/components/app/Composition.vue'
 
     export default {
         middleware: 'auth',
-        components: {searcherSelect},
+        components: {searcherSelect, CompositionsList, Composition},
         data() {
             return {
                 selectedIngredient: null,
                 ingredients: [],
-                formIngredient: {
-                    ingredient: null
-                },
                 ingredientsLoading: false,
 
-                // Table
-                items: [
-                    // {isActive: true, age: 40, name: {first: 'Dickerson', last: 'Macdonald'}},
-                    // {isActive: false, age: 21, name: {first: 'Larsen', last: 'Shaw'}},
-                    // {
-                    //     isActive: false,
-                    //     age: 9,
-                    //     name: {first: 'Mini', last: 'Navarro'},
-                    //     _rowVariant: 'success'
-                    // },
-                    // {isActive: false, age: 89, name: {first: 'Geneva', last: 'Wilson'}},
-                    // {isActive: true, age: 38, name: {first: 'Jami', last: 'Carney'}},
-                    // {isActive: false, age: 27, name: {first: 'Essie', last: 'Dunlap'}},
-                    // {isActive: true, age: 40, name: {first: 'Thor', last: 'Macdonald'}},
-                    // {
-                    //     isActive: true,
-                    //     age: 87,
-                    //     name: {first: 'Larsen', last: 'Shaw'},
-                    //     _cellVariants: {age: 'danger', isActive: 'warning'}
-                    // },
-                    // {isActive: false, age: 26, name: {first: 'Mitzi', last: 'Navarro'}},
-                    // {isActive: false, age: 22, name: {first: 'Genevieve', last: 'Wilson'}},
-                    // {isActive: true, age: 38, name: {first: 'John', last: 'Carney'}},
-                    // {isActive: false, age: 29, name: {first: 'Dick', last: 'Dunlap'}}
-                ],
+                formRecipe: {
+                    name: '',
+                    ingredients: []
+                },
+
+                compositions: null,
+                existCompositions: null,
                 fields: [
                     {key: 'name', label: 'Наименование', sortable: true, sortDirection: 'desc'},
-                    {key: 'age', label: 'Ингредиенты', sortable: true, class: 'text-center'},
-                    // {
-                    //     key: 'isActive',
-                    //     label: 'is Active',
-                    //     formatter: (value, key, item) => {
-                    //         return value ? 'Yes' : 'No'
-                    //     },
-                    //     sortable: true,
-                    //     sortByFormatted: true,
-                    //     filterByFormatted: true
-                    // },
+                    {key: 'compositions', label: 'Состав'},
                     {key: 'actions', label: 'Действие'}
                 ],
                 totalRows: 1,
@@ -177,27 +163,41 @@
         }
         ,
         methods: {
+            /** Get all ingredients for dropdown. */
             async getIngredients() {
                 this.ingredientsLoading = true;
                 const {data} = await this.$axios.get('/api/ingredients');
-                this.ingredients = data.results;
-                // data.results.forEach((ingredient, idx) => {
-                //     this.ingredients.push({
-                //         value: ingredient.id,
-                //         text: ingredient.name
-                //     })
-                // });
+                this.ingredients = data;
                 this.ingredientsLoading = false;
             },
-
-            info(item, index, button) {
-                this.infoModal.title = `Row index: ${index}`
-                this.infoModal.content = JSON.stringify(item, null, 2)
-                this.$root.$emit('bv::show::modal', this.infoModal.id, button)
+            /** Get all existing compositions. */
+            async getAllCompositions() {
+                const {data} = await this.$axios.get('/api/compositions/');
+                this.compositions = data;
+                // data.forEach((value, idx) => {
+                //     this.compositions[value.id] = {
+                //         name: value.name,
+                //         value: "0"
+                //     };
+                //     // this.compositions[value.id].value = "0";
+                // });
             },
-            resetInfoModal() {
-                this.infoModal.title = ''
-                this.infoModal.content = ''
+            addIngredient() {
+                const exist = this.formRecipe.ingredients.find((el) => {
+                    return el.id === this.selectedIngredient.id;
+                });
+                if (!exist) {
+                    this.formRecipe.ingredients.push(this.selectedIngredient);
+                    let compositions = this.selectedIngredient.compositions;
+                    this.compositions.forEach((value, idx) => {
+                        value
+                    });
+                    return;
+                }
+                alert('Ингредиент существует');
+            },
+            removeIngredient(idx) {
+                this.formRecipe.ingredients.splice(idx, 1);
             },
             onFiltered(filteredItems) {
                 // Trigger pagination to update the number of buttons/pages due to filtering
@@ -217,8 +217,10 @@
         },
 
         mounted() {
-            this.totalRows = this.items.length;
             this.getIngredients();
+            this.getAllCompositions();
+
+            this.totalRows = this.formRecipe.ingredients.length;
         }
     }
 </script>
@@ -275,5 +277,16 @@
 
   .info-icon-wrapper {
     margin-left: .4rem;
+  }
+
+  .composition-list-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+
+    .composition {
+      margin-right: 5px;
+      margin-top: 5px;
+    }
   }
 </style>
