@@ -115,7 +115,7 @@
     </div>
     <hr/>
     <div class="d-flex w-100">
-      <b-button variant="success" class="ml-auto">Создать рецепт</b-button>
+      <b-button variant="success" class="ml-auto" @click="submit">Создать рецепт</b-button>
     </div>
   </div>
 </template>
@@ -206,6 +206,9 @@
                 // Trigger pagination to update the number of buttons/pages due to filtering
                 this.totalRows = filteredItems.length;
                 this.currentPage = 1
+            },
+            submit() {
+
             }
         },
         computed: {

@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.text import slugify
 
 
 class NameModel(models.Model):
@@ -58,6 +59,11 @@ class Recipes(NameModel):
                                  verbose_name='Категория рецепта')
     created = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
     updated = models.DateTimeField(auto_now=True, verbose_name='Дата изменения')
+    slug = models.SlugField(unique=True)
+
+    def save(self, *args, **kwargs):
+        self.slug = slugify(self.name)
+        super(Recipes, self).save(*args, **kwargs)
 
     class Meta:
         verbose_name = 'Рецепт'

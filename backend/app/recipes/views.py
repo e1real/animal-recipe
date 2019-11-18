@@ -1,24 +1,7 @@
-from django.shortcuts import render
 from .models import Recipes, Ingredients, Compositions, IngredientsToCompositions
-from .serializers import RecipesSerializer, IngredientsSerializer, CompositionsSerializer, IngredientsToCompositionsSerializer
+from .serializers import RecipesSerializer, IngredientsSerializer, CompositionsSerializer, \
+    IngredientsToCompositionsSerializer, DefaultRecipesSerializer
 from rest_framework import viewsets
-
-
-def index(request):
-    context = {
-        'recipes': Recipes.objects.all()
-    }
-    return render(request, 'index.html', context)
-
-
-def create(request):
-    ingredients = Ingredients.objects.all()
-    compositions = Compositions.objects.all()
-    context = {
-        'ingredients': ingredients,
-        'compositions': compositions
-    }
-    return render(request, 'recipes/create.html', context)
 
 
 class RecipesViewSet(viewsets.ModelViewSet):
